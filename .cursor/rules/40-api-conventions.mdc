@@ -1,0 +1,21 @@
+---
+description: FastAPI 路由、Schema 与统一错误响应约定
+globs: app/api/**/*.py,app/schemas/**/*.py
+alwaysApply: false
+---
+
+# API 约定
+
+- 对外路由挂在 `/v1`，在 `app/api/router.py` 汇总；handler 保持薄
+- 依赖用 `Depends(get_container)` 取 `AppContainer`，不要在模块全局创建 client
+- JSON 用 Pydantic 请求体；multipart 上传用 `File`/`Form`，再用对应 Form schema 校验
+- 上传必须走大小与类型检查（`max_upload_bytes`、`IMAGE_TYPES`/`VIDEO_TYPES`、`normalize_upload`）
+- 响应模型显式声明 `response_model`；错误结构为 `{code, message}`，由 `AppError` 处理
+- 文生图默认同步、视频类默认 `async_mode=true`；不要悄悄改默认值，除非 spec 写明
+- 鉴权走 `X-API-Key` 与 `require_api_key`；生产必须配 `API_KEYS`
+- 不要返回本地绝对路径；媒体地址用 `MediaRef.url`（如 `/v1/media/{file_id}`）
+
+```python
+# ❌ def foo(): ...  # 同步路由里做阻塞下载
+# ✅ async def foo(payload: XxxRequest, container: AppContainer = Depends(get_container))
+```

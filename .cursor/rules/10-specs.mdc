@@ -1,0 +1,31 @@
+---
+description: 大改动必须先写 spec/design/tasks，确认后再实现
+alwaysApply: true
+---
+
+# Specs 流程（先方案后实现）
+
+动手前先判定规模。大改动禁止直接改业务代码。
+
+**必须走 specs（满足任一）：**
+
+- 跨 2 个以上分层
+- 改 API 契约、鉴权、状态码语义
+- 新增 Provider 或 storage/queue/task backend
+- 改异步任务、队列、Worker
+- 改生产约束或配置模型
+- 预估 ≥ 4 个文件或较大净变更
+- 用户提到方案、设计、规划、约束
+
+**可直接改：** 单文件 bug、测试、注释、文案。须在回复中写明「判定为小改动」。
+
+**大改动步骤：**
+
+1. 读取并遵循 `.cursor/skills/specs-driven-dev/SKILL.md`
+2. 在 `specs/YYYY-MM-DD-slug/` 写 `spec.md`、`design.md`、`tasks.md`
+3. 向用户给方案摘要，**等待明确同意**
+4. 同意后再按 `tasks.md` 实现，完成一项勾一项
+5. 设计变更时先改文档，再改代码
+
+用户说「直接改 / 不用方案 / 小改」可跳过等待，不可跳过分层与安全规则。
+模板：`specs/templates/`。

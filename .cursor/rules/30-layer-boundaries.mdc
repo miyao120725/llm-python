@@ -1,0 +1,31 @@
+---
+description: 分层依赖方向与代码落点，禁止打穿架构
+globs: app/**/*.py
+alwaysApply: false
+---
+
+# 分层边界
+
+依赖只能向内：API → Service → Pipeline → Ports/Provider。Domain 不依赖其他层。
+
+**禁止：**
+
+- 在 `app/api/routes` 里调 Provider、读写磁盘、操作队列
+- 在 `app/services` / `app/pipelines` 里 import `app.infrastructure.*` 或厂商 SDK
+- 在 `app/domain` 里 import FastAPI、httpx、pydantic-settings
+- 复制一份平行架构绕过 `container.py` / `registry.py` / `factory.py`
+- 把新业务逻辑塞进 `app/main.py`
+
+**新代码落点：**
+
+| 需求 | 放哪里 |
+| --- | --- |
+| 新 HTTP 接口 | `app/api/routes` + `app/schemas` + `router.py` 注册 |
+| 任务编排 | `app/services` |
+| 生成步骤 | `app/pipelines` |
+| 新厂商 | `app/providers/<kind>/` + `registry.py` |
+| 新存储/队列/任务库 | `app/ports` 接口 + `app/infrastructure` 实现 + `factory.py` |
+| 新错误 | `app/core/exceptions.py` |
+| 新配置项 | `app/config.py` + `.env.example` |
+
+装配只发生在 `app/container.py` 与 `app/infrastructure/factory.py`。

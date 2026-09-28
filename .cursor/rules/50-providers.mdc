@@ -1,0 +1,17 @@
+---
+description: LLM / Image / Video Provider 扩展与 mock 约定
+globs: app/providers/**/*.py
+alwaysApply: false
+---
+
+# Provider 约定
+
+- 继承 `LLMProvider` / `ImageProvider` / `VideoProvider`，实现抽象方法，提供 `aclose()`
+- 必须同时有 mock 实现；无 Key 或 `allow_mock_providers` 时要能回退
+- 只在 `app/providers/registry.py` 的 `build_providers` 里分支装配，不要在路由里 `if provider ==`
+- OpenAI 兼容走现有 `openai_compat`；协议不同再新增模块，不要把多厂商 if/else 堆进一个类
+- 不要把厂商响应原样泄漏给 API；转换成 domain/pipeline 需要的结构（文本、图片字节、`MediaBlob`）
+- 超时、轮询、重试参数来自 `Settings`，不要写死
+- `mocked=True` 仅 mock；生产环境禁止 mock（`Settings.validate_runtime`）
+
+新增厂商时读取 `.cursor/skills/add-provider/SKILL.md`。

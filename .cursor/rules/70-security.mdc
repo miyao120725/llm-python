@@ -1,0 +1,30 @@
+---
+description: 密钥、生产约束、上传与日志安全边界
+alwaysApply: true
+---
+
+# 安全与边界
+
+**密钥与仓库**
+
+- 禁止把 API Key、S3 密钥写入代码、规则、spec、测试、README
+- 禁止提交 `.env`、`data/`、密钥文件；示例只改 `.env.example` 的空值和注释
+- 日志、错误信息、健康检查不得输出密钥或完整 Authorization 头
+
+**生产（`APP_ENV=production`）**
+
+- 禁止 mock provider
+- 必须 `API_KEYS`、`QUEUE_BACKEND=redis`
+- 禁止 `EMBEDDED_WORKER`；Worker 独立进程
+- S3 必须有 `S3_BUCKET`
+
+**输入与权限**
+
+- 上传受 `MAX_UPLOAD_MB` 与类型白名单限制，不要放宽到无上限
+- 不要关闭鉴权来“方便联调”后残留到生产配置
+- CORS 生产不要用 `*` 配 `allow_credentials=True` 作为推荐默认
+
+**行为边界**
+
+- 不实现与生成服务无关的爬虫、攻击、绕过鉴权逻辑
+- 不删除用户媒体或任务数据，除非 spec 明确要求并有确认

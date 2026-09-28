@@ -1,0 +1,15 @@
+---
+description: 测试必须走 mock，覆盖生成链路与健康检查
+globs: tests/**/*.py
+alwaysApply: false
+---
+
+# 测试约定
+
+- 用 `pytest` + `TestClient(create_app())`；在 `with` 里发请求，确保 lifespan 启动
+- **禁止**测试调用真实 LLM/图片/视频 API，依赖默认 mock 回退
+- 不读真实 `.env` 密钥；需要配置时在测试里临时改环境变量并 `reset_settings()`
+- 覆盖至少：健康检查 mock 标记、文生图同步成功、图生视频/视频生视频 mock、LLM chat/扩写
+- 断言状态码、`status`/`kind`、错误 `code`，不要只断言 `200`
+- 不要把生成的媒体写入仓库；测试数据用内存字节（如 `_MINIMAL_PNG`）
+- 改 API 或生成链路时同步更新 `tests/test_health.py`、`tests/test_generate.py` 或新增测试模块

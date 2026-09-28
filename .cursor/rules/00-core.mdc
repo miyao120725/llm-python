@@ -1,0 +1,27 @@
+---
+description: 多模态生成服务的核心架构、默认行为与 AI 协作入口
+alwaysApply: true
+---
+
+# 项目核心
+
+这是 FastAPI 多模态生成服务：文生图、图生视频、视频生视频，LLM 可插拔。未配置真实 Key 时自动 mock。
+
+分层（禁止打穿）：
+
+| 层 | 目录 | 只允许做 |
+| --- | --- | --- |
+| API | `app/api` | HTTP、校验、上传、错误映射 |
+| Schema | `app/schemas` | 请求/响应 Pydantic |
+| Service | `app/services` | 任务提交、同步/异步等待 |
+| Pipeline | `app/pipelines` | 扩写提示词 → 调模型 → 落盘 |
+| Provider | `app/providers` | 厂商适配，须有 mock |
+| Port | `app/ports` | 存储/队列/任务接口 |
+| Infra | `app/infrastructure` | Port 实现，经 factory 装配 |
+| Domain | `app/domain` | 纯模型，无 FastAPI、无 IO |
+| Worker | `app/worker` | 消费队列、跑 pipeline |
+
+新厂商只加 Provider 并在 `registry.py` 注册。新存储/队列/任务只加 Port 实现并在 `factory.py` 注册。
+
+大改动先走 specs，再改代码。入口：`AGENTS.md`、`specs/README.md`。
+回复使用简体中文。

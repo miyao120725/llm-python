@@ -1,0 +1,49 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  api:
+    build: .
+    command: python -m app.main
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: development
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      API_KEYS: dev-key
+      ALLOW_MOCK_PROVIDERS: "true"
+      EMBEDDED_WORKER: "false"
+      QUEUE_BACKEND: redis
+      REDIS_URL: redis://redis:6379/0
+      TASK_BACKEND: sqlite
+      SQLITE_PATH: /app/data/tasks.db
+      STORAGE_BACKEND: local
+      STORAGE_DIR: /app/data/media
+    volumes:
+      - gen-data:/app/data
+    depends_on:
+      - redis
+
+  worker:
+    build: .
+    command: python -m app.worker
+    environment:
+      APP_ENV: development
+      ALLOW_MOCK_PROVIDERS: "true"
+      EMBEDDED_WORKER: "false"
+      QUEUE_BACKEND: redis
+      REDIS_URL: redis://redis:6379/0
+      TASK_BACKEND: sqlite
+      SQLITE_PATH: /app/data/tasks.db
+      STORAGE_BACKEND: local
+      STORAGE_DIR: /app/data/media
+    volumes:
+      - gen-data:/app/data
+    depends_on:
+      - redis
+
+volumes:
+  gen-data:
